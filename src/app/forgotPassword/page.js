@@ -20,7 +20,7 @@ export default function ForgotPassword() {
 
   // const handleLogin = (event) => {
   //     event.preventDefault();
-  //     router.push('/account');
+  //     router.push('/dashboard');
   // };
   const handleForgotPassword = (event) => {
     event.preventDefault()

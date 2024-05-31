@@ -39,12 +39,13 @@ export default function Login() {
         localStorage.setItem('email', data.email)
         localStorage.setItem('full_name', data.full_name)
         localStorage.setItem('role', data.role)
+        localStorage.setItem('is_new', data.is_new)
         localStorage.setItem('access_token', data.access_token)
         localStorage.setItem('refresh_token', data.refresh_token)
         localStorage.setItem('expire_on', data.expire_on)
 
         // Navigate to the account page
-        router.push('/account')
+        router.push('/dashboard')
       })
       .catch((error) => {
         console.log(error)

@@ -1,25 +1,24 @@
 'use client'
-import React from 'react'
-import { useEffect, useState } from 'react'
-import Avatar from '@mui/material/Avatar'
-import Button from '@mui/material/Button'
-import CssBaseline from '@mui/material/CssBaseline'
-import TextField from '@mui/material/TextField'
-import Grid from '@mui/material/Grid'
-import Box from '@mui/material/Box'
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined'
-import Typography from '@mui/material/Typography'
-import Container from '@mui/material/Container'
-import { createTheme, ThemeProvider } from '@mui/material/styles'
-import { Formik, Form, Field, ErrorMessage } from 'formik'
-import * as Yup from 'yup'
-import MenuItem from '@mui/material/MenuItem'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import axios from 'axios'
-import CandyModal from '../components/CandyModal'
+import React, { useState, useEffect } from 'react';
+import Avatar from '@mui/material/Avatar';
+import Button from '@mui/material/Button';
+import CssBaseline from '@mui/material/CssBaseline';
+import TextField from '@mui/material/TextField';
+import Grid from '@mui/material/Grid';
+import Box from '@mui/material/Box';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import Typography from '@mui/material/Typography';
+import Container from '@mui/material/Container';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
+import MenuItem from '@mui/material/MenuItem';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import axios from 'axios';
+import CandyModal from '../components/CandyModal';
 
-const defaultTheme = createTheme()
+const defaultTheme = createTheme();
 const validationSchema = Yup.object({
   firstName: Yup.string().required('First Name is required'),
   lastName: Yup.string().required('Last Name is required'),
@@ -32,32 +31,34 @@ const validationSchema = Yup.object({
     .min(8)
     .required('Re-enter Password is required'),
   userType: Yup.string().required('User Type is required'),
-})
+});
 
 export default function SignUp() {
-  const router = useRouter()
-  const [totalCandy, setTotalCandy] = useState(0)
-  const [candyOpen, setCandyOpen] = useState(false)
+  const router = useRouter();
+  const [totalCandy, setTotalCandy] = useState(0);
+  const [candyOpen, setCandyOpen] = useState(false);
+
   useEffect(() => {
     try {
       axios.get('/api/CandyPayments').then((res) => {
-        console.log(res)
-        setTotalCandy(res?.data?.totalDonations / 100)
-      })
+        setTotalCandy(res?.data?.totalDonations / 100);
+      });
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }, [])
+  }, []);
 
-  const handleSubmit = (values) => {
+  const handleSubmit = (values, { setSubmitting }) => {
     if (values.userType === '2') {
-      handleSubmitAPI()
+      handleSubmitAPI(values, { setSubmitting });
     } else {
-      localStorage.setItem('signupData', JSON.stringify(values))
-      setCandyOpen(true)
+      localStorage.setItem('signupData', JSON.stringify(values));
+      setCandyOpen(true);
+      setSubmitting(false);
     }
-  }
-  const handleSubmitAPI = (values, { setSubmitting }) => {
+  };
+
+  const handleSubmitAPI = async (values, { setSubmitting }) => {
     const signupData = {
       email: values.email,
       first_name: values.firstName,
@@ -65,25 +66,22 @@ export default function SignUp() {
       password: values.password,
       password2: values.reenterPassword,
       role: values.userType,
-    }
+    };
 
-    axios
-      .post('http://13.50.187.28/api/v1/users/signup/', signupData)
-      .then((response) => {
-        // Handle successful signup, e.g., navigate to the verification page or login page
-        console.log(response.data)
-        localStorage.setItem('email', values.email)
-        router.push('/verify')
-      })
-      .catch((error) => {
-        console.error('Signup error:', error)
-        // Handle signup error, e.g., show an error message
-        alert('Signup failed. Please try again.')
-      })
-      .finally(() => {
-        setSubmitting(false)
-      })
-  }
+    try {
+      const response = await axios.post('http://13.50.187.28/api/v1/users/signup/', signupData);
+      // Handle successful signup, e.g., navigate to the verification page or login page
+      console.log(response.data);
+      localStorage.setItem('email', values.email);
+      router.push('/verify');
+    } catch (error) {
+      console.error('Signup error:', error);
+      // Handle signup error, e.g., show an error message
+      alert('Signup failed. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -134,8 +132,8 @@ export default function SignUp() {
                       id='firstName'
                       label='First Name'
                       onChange={(e) => {
-                        setFieldValue('firstName', e.target.value)
-                        setFieldTouched('firstName', true, false)
+                        setFieldValue('firstName', e.target.value);
+                        setFieldTouched('firstName', true, false);
                       }}
                       helperText={
                         touched.firstName && errors.firstName ? (
@@ -157,8 +155,8 @@ export default function SignUp() {
                       name='lastName'
                       autoComplete='family-name'
                       onChange={(e) => {
-                        setFieldValue('lastName', e.target.value)
-                        setFieldTouched('lastName', true, false)
+                        setFieldValue('lastName', e.target.value);
+                        setFieldTouched('lastName', true, false);
                       }}
                       helperText={
                         touched.lastName && errors.lastName ? (
@@ -180,8 +178,8 @@ export default function SignUp() {
                       name='email'
                       autoComplete='email'
                       onChange={(e) => {
-                        setFieldValue('email', e.target.value)
-                        setFieldTouched('email', true, false)
+                        setFieldValue('email', e.target.value);
+                        setFieldTouched('email', true, false);
                       }}
                       helperText={
                         touched.email && errors.email ? (
@@ -204,8 +202,8 @@ export default function SignUp() {
                       id='password'
                       autoComplete='new-password'
                       onChange={(e) => {
-                        setFieldValue('password', e.target.value)
-                        setFieldTouched('password', true, false)
+                        setFieldValue('password', e.target.value);
+                        setFieldTouched('password', true, false);
                       }}
                       helperText={
                         touched.password && errors.password ? (
@@ -228,8 +226,8 @@ export default function SignUp() {
                       id='reenterPassword'
                       autoComplete='new-password'
                       onChange={(e) => {
-                        setFieldValue('reenterPassword', e.target.value)
-                        setFieldTouched('reenterPassword', true, false)
+                        setFieldValue('reenterPassword', e.target.value);
+                        setFieldTouched('reenterPassword', true, false);
                       }}
                       helperText={
                         touched.reenterPassword && errors.reenterPassword ? (
@@ -252,8 +250,8 @@ export default function SignUp() {
                       label='Select User Type'
                       name='userType'
                       onChange={(e) => {
-                        setFieldValue('userType', e.target.value)
-                        setFieldTouched('userType', true, false)
+                        setFieldValue('userType', e.target.value);
+                        setFieldTouched('userType', true, false);
                       }}
                       helperText={
                         touched.userType && errors.userType ? (
@@ -274,7 +272,6 @@ export default function SignUp() {
                   fullWidth
                   variant='contained'
                   sx={{ mt: 3, mb: 2 }}
-                  // disabled={isSubmitting}
                   style={{ backgroundColor: '#272727', color: '#fff' }}
                 >
                   Sign Up
@@ -293,5 +290,5 @@ export default function SignUp() {
       </Container>
       <CandyModal open={candyOpen} setOpen={setCandyOpen} />
     </ThemeProvider>
-  )
+  );
 }

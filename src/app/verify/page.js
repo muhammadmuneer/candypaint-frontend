@@ -21,7 +21,7 @@ export default function Verify() {
 
   // const handleLogin = (event) => {
   //     event.preventDefault();
-  //     router.push('/account');
+  //     router.push('/dashboard');
   // };
   useEffect(() => {
     // Assuming email is stored in localStorage after signup
@@ -44,7 +44,7 @@ export default function Verify() {
       .then((response) => {
         // Handle successful OTP verification
         console.log(response.data)
-        router.push('/login')
+        router.push('/das')
       })
       .catch((error) => {
         console.error('OTP verification error:', error)
