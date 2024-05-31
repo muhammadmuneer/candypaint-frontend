@@ -23,8 +23,8 @@ export async function POST(req) {
         },
       ],
       mode: 'payment',
-      success_url: 'https://poppy-next.vercel.app//paymentSuccess',
-      cancel_url: 'https://poppy-next.vercel.app/',
+      success_url: 'http://localhost:3000/paymentSuccess',
+      cancel_url: 'http://localhost:3000',
       metadata: {
         donation_id: 'Candy_01',
       },

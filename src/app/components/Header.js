@@ -33,8 +33,11 @@ function Header() {
         setIsAuthenticated(!!token);
         setUserType(storedUserType);
 
-        if (storedUserType !== '2') {
+        // Update the condition here to also check if storedUserType is truthy
+        if (storedUserType && storedUserType !== '2') {
             setShowMyEvent(true);
+        } else {
+            setShowMyEvent(false);
         }
     }, []);
 

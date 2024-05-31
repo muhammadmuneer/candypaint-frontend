@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import styles from './dashboard.module.css';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
-import Link from 'next/link';
 
 const categories = {
   mood: [

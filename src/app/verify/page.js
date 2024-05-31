@@ -44,7 +44,7 @@ export default function Verify() {
       .then((response) => {
         // Handle successful OTP verification
         console.log(response.data)
-        router.push('/das')
+        router.push('/dashboard')
       })
       .catch((error) => {
         console.error('OTP verification error:', error)

@@ -8,15 +8,11 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    // Check if user data is in local storage
-    const userData = localStorage.getItem('userData');
-
+    const userData = localStorage.getItem('access_token');
     if (userData) {
-      // If userData exists, redirect to the dashboard
       router.push('/dashboard');
     }
-    // If no userData, do nothing and stay on this page
-  }, [router]); // Dependency array includes router to prevent unnecessary re-renders
+  }, [router])
 
   return (
     <main>

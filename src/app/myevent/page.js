@@ -186,7 +186,7 @@ export default function Dashboard() {
                     Create Event
                 </Button>
             </div>
-            <div lassName={styles.event_container}>
+            <div className={styles.event_container}>
                 {event.length > 0 ? (
                     <div className={styles.event_cards}>
                         {event.map((event, index) => (

@@ -1,40 +1,58 @@
 'use client'
 import React, { useState, useEffect } from 'react';
-// import { useRouter } from 'next/navigation';
-// import axios from 'axios';
+import axios from 'axios';
+import { useParams, useRouter } from 'next/navigation'
+import styles from './id.module.css'
 
 export default function EventPage() {
     const [data, setData] = useState(null);
-    // const router = useRouter();
-    // if (!router.query || !router.query.id) return;
-    // const { id } = router.query;
+    const params = useParams()
+    const router = useRouter();
 
-    // useEffect(() => {
-    //         const token = localStorage.getItem('access_token')
-    //         axios.get('http://13.50.187.28/api/v1/users/events/${id}', {
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //                 'Authorization': `Bearer ${token}`
-    //             }
-    //         })
-    //             .then(response => {
-    //                 setData(response?.data?.data?.Items)
-    //             })
-    //             .catch(error => {
-    //                 console.error('Error fetching data:', error)
-    //             });
-    // }, [])
-
+    useEffect(() => {
+        const token = localStorage.getItem('access_token');
+        axios.get(`http://13.50.187.28/api/v1/users/events/${params.slug}/`, {  // Use the slug as the event ID
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        })
+            .then(response => {
+                setData(response.data.data);  // Assuming response.data.data.Items is correct according to your API structure
+            })
+            .catch(error => {
+                console.error('Error fetching data:', error);
+            });
+    }, []);
+    const HandleDelete = () => {
+        const token = localStorage.getItem('access_token');
+        axios.delete(`http://13.50.187.28/api/v1/users/events/${params.slug}/`, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        })
+            .then(response => {
+                alert(response.data.message_code)
+                router.push('/myevent');
+            })
+            .catch(error => {
+                alert('Error creating event:', error);
+            });
+    };
     return (
         <div className='container'>
-            <h2>Event Details</h2>
+            <h2 style={{textAlign:"center", marginTop:"1.5rem"}}>Event Details</h2>
             {data ? (
-                <div>
+                <div className={styles.event_container}>
                     <p>Name: {data.name}</p>
                     <p>Address: {data.address}</p>
                     <p>Latitude: {data.latitude}</p>
                     <p>Longitude: {data.longitude}</p>
                     <p>Host: {data.host}</p>
+                    <div className={styles.centerButton}>
+                        <button className={styles.deleteButton} onClick={HandleDelete}>Delete This Event</button>
+                    </div>
                 </div>
             ) : (
                 <p>Loading...</p>
