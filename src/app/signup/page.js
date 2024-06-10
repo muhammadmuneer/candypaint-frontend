@@ -69,7 +69,7 @@ export default function SignUp() {
     };
 
     try {
-      const response = await axios.post('http://13.50.187.28/api/v1/users/signup/', signupData);
+      const response = await axios.post('https://api.candypaint.us/api/v1/users/signup/', signupData);
       // Handle successful signup, e.g., navigate to the verification page or login page
       console.log(response.data);
       localStorage.setItem('email', values.email);
@@ -77,7 +77,7 @@ export default function SignUp() {
     } catch (error) {
       console.error('Signup error:', error);
       // Handle signup error, e.g., show an error message
-      alert('Signup failed. Please try again.');
+      alert(error.response.data.data.message);
     } finally {
       setSubmitting(false);
     }

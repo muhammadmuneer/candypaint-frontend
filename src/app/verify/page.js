@@ -37,14 +37,14 @@ export default function Verify() {
   const handleVerify = (event) => {
     event.preventDefault()
     axios
-      .post('http://13.50.187.28/api/v1/users/verifyotp/', {
+      .post('https://api.candypaint.us/api/v1/users/verifyotp/', {
         email: email,
         otp: otp,
       })
       .then((response) => {
         // Handle successful OTP verification
         console.log(response.data)
-        router.push('/dashboard')
+        router.push('/login')
       })
       .catch((error) => {
         console.error('OTP verification error:', error)

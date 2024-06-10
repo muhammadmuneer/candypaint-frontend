@@ -1,45 +1,39 @@
 'use client'
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
-import Menu from '@mui/material/Menu';
+import { useRouter, usePathname } from 'next/navigation';
+import { AppBar, Box, Toolbar, IconButton, Typography, Menu, MenuItem, Container, Avatar, Button, Tooltip } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import Container from '@mui/material/Container';
-import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
-import Tooltip from '@mui/material/Tooltip';
-import MenuItem from '@mui/material/MenuItem';
 import AdbIcon from '@mui/icons-material/Adb';
 import axios from 'axios';
-
-const authSettings = ['Profile', 'Dashboard', 'Logout'];
+import { Wallet } from '@mui/icons-material';
 const guestSettings = ['Login'];
 
 function Header() {
     const router = useRouter();
+    const pathname = usePathname()
     const [anchorElNav, setAnchorElNav] = useState(null);
     const [anchorElUser, setAnchorElUser] = useState(null);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [showMyEvent, setShowMyEvent] = useState(false);
     const [userType, setUserType] = useState(null);
-
+    const [renderHeader, setRenderHeader] = useState(true);
+    const [authSettings, setAuthSettings] = useState(['Preference', 'Dashboard', 'Logout']);
+    
     useEffect(() => {
         const token = localStorage.getItem('access_token');
-        const storedUserType = localStorage.getItem('role'); // Assuming user_type is stored in local storage
-        setIsAuthenticated(!!token);
+        const storedUserType = localStorage.getItem('role'); 
+        const isAuth = !!token;
+        setIsAuthenticated(isAuth);
         setUserType(storedUserType);
-
-        // Update the condition here to also check if storedUserType is truthy
-        if (storedUserType && storedUserType !== '2') {
-            setShowMyEvent(true);
+        setShowMyEvent(storedUserType && storedUserType !== '2');
+        const noHeaderRoutes = ['/forgotpassword', '/verify', '/signup', '/login', '/paymentsuccess', "/"];
+        setRenderHeader(!noHeaderRoutes.includes(pathname));
+        if (storedUserType === '1') {
+            setAuthSettings(['Dashboard', 'Logout']);
         } else {
-            setShowMyEvent(false);
+            setAuthSettings(['Dashboard', 'Wallet', 'Logout', ]);
         }
-    }, []);
+    }, [pathname]);
 
     const handleOpenNavMenu = (event) => {
         setAnchorElNav(event.currentTarget);
@@ -52,7 +46,7 @@ function Header() {
     const handleCloseNavMenu = (page) => {
         setAnchorElNav(null);
         if (page) {
-            router.push(`/${page.toLowerCase().replace(' ', '')}`); // This will redirect to the route based on the page name
+            router.push(`/${page.toLowerCase().replace(' ', '')}`)
         }
     };
 
@@ -66,13 +60,13 @@ function Header() {
             case 'Dashboard':
                 router.push('/dashboard');
                 break;
-            case 'Profile':
-                router.push('/profile');
+            case 'Wallet':
+                router.push('/wallet');
                 break;
             case 'Logout':
                 handleLogout();
                 break;
-            case 'Login': // Handling login click
+            case 'Login':
                 router.push('/login');
                 break;
             default:
@@ -83,7 +77,7 @@ function Header() {
     const handleLogout = () => {
         const token = localStorage.getItem('access_token');
         if (token) {
-            axios.post('http://13.50.187.28/api/v1/users/logout/', { token }, {
+            axios.post('https://api.candypaint.us/api/v1/users/logout/', { token }, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
@@ -96,22 +90,20 @@ function Header() {
                     router.push('/login');
                 })
                 .catch(error => {
-                    console.error('Logout failed', error);
-                    // Handling error more gracefully
-                    if (error.response) {
-                        console.log(error.response.data);
-                        console.log(error.response.status);
-                        console.log(error.response.headers);
-                    } else if (error.request) {
-                        console.log(error.request);
+                    if (error.response && error.response.data.code === 401) {
+                        // If the API returns a 401 error, clear the localStorage and redirect to login page
+                        localStorage.clear();
+                        setIsAuthenticated(false);
+                        router.push('/login');
                     } else {
-                        console.log('Error', error.message);
+                        console.error('Logout failed', error);
                     }
-                    console.log(error.config);
                 });
         }
     };
-
+    if (!renderHeader) {
+        return null; // Do not render the header on specified routes
+    }
     return (
         <AppBar position="static" sx={{ backgroundColor: '#272727', color: '#fff' }}>
             <Container maxWidth="xl">
@@ -207,7 +199,7 @@ function Header() {
                     <Box sx={{ flexGrow: 0 }}>
                         <Tooltip title="Open settings">
                             <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                                <Avatar alt="User Avatar" src="https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.flaticon.com%2Ffree-icon%2Fprofile_3135823&psig=AOvVaw0og32xHoR5FDKZmTlGfV63&ust=1717227528884000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCNjXv-Kwt4YDFQAAAAAdAAAAABAR" />
+                                <Avatar alt="User Avatar" src="https://images.rawpixel.com/image_png_800/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIzLTAyL3BmLWljb240LWppcjIwNjQtcG9yLTAzLWxjb3B5LnBuZw.png" />
                             </IconButton>
                         </Tooltip>
                         <Menu

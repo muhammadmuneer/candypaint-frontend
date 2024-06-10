@@ -26,7 +26,7 @@ export default function Login() {
   const handleLogin = (event) => {
     event.preventDefault()
     axios
-      .post('http://13.50.187.28/api/v1/users/login/', {
+      .post('https://api.candypaint.us/api/v1/users/login/', {
         email: email,
         password: password,
       })
@@ -39,10 +39,12 @@ export default function Login() {
         localStorage.setItem('email', data.email)
         localStorage.setItem('full_name', data.full_name)
         localStorage.setItem('role', data.role)
+        localStorage.setItem('referral_code', data.referral_code)
         localStorage.setItem('is_new', data.is_new)
         localStorage.setItem('access_token', data.access_token)
         localStorage.setItem('refresh_token', data.refresh_token)
         localStorage.setItem('expire_on', data.expire_on)
+        localStorage.setItem('isLoggedIn', true)
 
         // Navigate to the account page
         router.push('/dashboard')

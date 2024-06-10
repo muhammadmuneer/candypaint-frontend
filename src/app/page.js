@@ -24,16 +24,23 @@ export default function Home() {
 function App() {
   return (
     <section className={styles.main}>
-      <h1>CANDYPAINT</h1>
-      <h2>GEOSOCIAL EXPERIENTIAL ECONOMY</h2>
-      <h2>GLITZ TYPE SYNC</h2>
+      <p className={styles.headingMain}>CANDYPAINT</p>
+      <p className={styles.heading1}>GEOSOCIAL </p>
+      <p className={styles.heading2}>EXPERIENTIAL ECONOMY</p>
+      <p className={styles.heading3}>GLITZ TYPE SYNC</p>
       <div className={styles.tab_container}>
-        <Link href='/signup' legacyBehavior>
-          <a className={styles.tab_button}>Sign Up</a>
-        </Link>
-        <Link href='/login' legacyBehavior>
-          <a className={styles.tab_button}>Login</a>
-        </Link>
+        <div>
+          <p className={styles.mobileS}>New fam new revenue new clout </p>
+          <p className={styles.mobileSS}>access platform experience with same url on mobile</p>
+        </div>
+        <div>
+          <Link href='/signup' legacyBehavior>
+            <a className={styles.tab_button}>Sign Up</a>
+          </Link>
+          <Link href='/login' legacyBehavior>
+            <a className={styles.tab_button}>Login</a>
+          </Link>
+        </div>
       </div>
     </section>
   );

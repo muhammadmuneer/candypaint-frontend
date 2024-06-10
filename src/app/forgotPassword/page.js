@@ -25,7 +25,7 @@ export default function ForgotPassword() {
   const handleForgotPassword = (event) => {
     event.preventDefault()
     axios
-      .post('http://13.50.187.28/api/v1/users/reset-password/', {
+      .post('https://api.candypaint.us/api/v1/users/reset-password/', {
         email: email,
       })
       .then((response) => {

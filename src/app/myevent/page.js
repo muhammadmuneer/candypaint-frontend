@@ -1,23 +1,22 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation';
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
-import Modal from '@mui/material/Modal';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
+import { Button, TextField, Modal, Box, IconButton, Typography, FormControl, InputLabel, Select, MenuItem, Stack, Chip } from '@mui/material';
 import axios from 'axios';
-import Chip from '@mui/material/Chip';
-import Stack from '@mui/material/Stack';
 import styles from './myevent.module.css'
 import Link from 'next/link';
+import CloseIcon from '@mui/icons-material/Close';
+import moment from 'moment';
 
+const categories = {
+    Mood: ['chill', 'energetic', 'relaxed', 'vibrant', 'cozy', 'bohemian', 'sophisticated', 'fun', 'playful', 'mellow'],
+    Ambience: ['intimate', 'inviting', 'electric', 'romantic', 'festive', 'laid-back', 'warm', 'modern', 'rustic', 'glamorous'],
+    PartyThemes: ['tropical luau', '1920s gatsby', 'disco fever', 'hollywood red carpet', 'masquerade ball', 'carnival/circus', 'beach bash', 'winter wonderland', 'casino night', 'around the world'],
+};
 export default function Dashboard() {
     const router = useRouter();
     const [locationData, setLocationData] = useState(null);
-    const [locationPermissionDenied, setLocationPermissionDenied] = useState(false);
     const [open, setOpen] = useState(false);
-    const [data, setData] = useState('');
     const [event, setEvent] = useState('');
     const [eventData, setEventData] = useState({
         name: '',
@@ -25,28 +24,30 @@ export default function Dashboard() {
         location_url: '',
         latitude: '',
         longitude: '',
+        start_datetime: '',
+        end_datetime: '',
+        description: '',
         keywords: [],
     });
-    const [keywordInput, setKeywordInput] = useState('');
+
+    const fetchEvents = async () => {
+        try {
+            const token = localStorage.getItem('access_token');
+            const response = await axios.get('https://api.candypaint.us/api/v1/users/events/', {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            // Update state with the retrieved data
+            setEvent(response?.data?.data?.Items);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    };
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const token = localStorage.getItem('access_token');
-                const response = await axios.get('http://13.50.187.28/api/v1/users/events/', {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                // Update state with the retrieved data
-                setEvent(response?.data?.data?.Items);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-        };
-
-        fetchData();
+        fetchEvents();
     }, []);
     useEffect(() => {
         const userData = localStorage.getItem('role');
@@ -58,10 +59,6 @@ export default function Dashboard() {
                 navigator.permissions.query({ name: 'geolocation' }).then((result) => {
                     if (result.state === 'granted') {
                         getLocationData();
-                    } else if (result.state === 'prompt') {
-                        showLocationPrompt();
-                    } else {
-                        setLocationPermissionDenied(true);
                     }
                 });
             } else {
@@ -115,12 +112,6 @@ export default function Dashboard() {
         );
     };
 
-    const showLocationPrompt = () => {
-        navigator.geolocation.getCurrentPosition(getLocationData, () =>
-            setLocationPermissionDenied(true)
-        );
-    };
-
     const handleOpen = () => setOpen(true);
     const handleClose = () => {
         setOpen(false);
@@ -129,28 +120,13 @@ export default function Dashboard() {
             name: '',
             keywords: [],
         }));
-        setKeywordInput('');
     };
 
-    const handleChange = (e) => {
-        setEventData({
-            ...eventData,
-            [e.target.name]: e.target.value,
-        });
-    };
-
-    const handleKeywordChange = (e) => {
-        setKeywordInput(e.target.value);
-    };
-
-    const handleAddKeyword = () => {
-        if (keywordInput.trim()) {
-            setEventData((prevEventData) => ({
-                ...prevEventData,
-                keywords: [...prevEventData.keywords, keywordInput.trim()],
-            }));
-            setKeywordInput('');
-        }
+    const handleSelectChange = (category, value) => {
+        setEventData((prevEventData) => ({
+            ...prevEventData,
+            keywords: prevEventData.keywords.includes(value) ? prevEventData.keywords : [...prevEventData.keywords, value],
+        }));
     };
 
     const handleDeleteKeyword = (keywordToDelete) => {
@@ -159,10 +135,14 @@ export default function Dashboard() {
             keywords: prevEventData.keywords.filter((keyword) => keyword !== keywordToDelete),
         }));
     };
-
     const handleSubmit = () => {
         const token = localStorage.getItem('access_token');
-        axios.post('http://13.50.187.28/api/v1/users/events/', eventData, {
+        const formattedEventData = {
+            ...eventData,
+            start_datetime: moment(eventData.start_datetime).format('YYYY-MM-DDTHH:mm:ssZ'),
+            end_datetime: moment(eventData.end_datetime).format('YYYY-MM-DDTHH:mm:ssZ'),
+        };
+        axios.post('https://api.candypaint.us/api/v1/users/events/', formattedEventData, {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
@@ -170,13 +150,30 @@ export default function Dashboard() {
         })
             .then(response => {
                 alert(response.data.message_code);
-                setData(response.data.data)
                 handleClose();
+                fetchEvents();
             })
             .catch(error => {
                 alert('Error creating event:', error);
             });
     };
+    // Getting the current datetime in the required format for input[type='datetime-local']
+    const getCurrentDateTimeLocal = () => {
+        const now = new Date();
+        const localDate = new Date(now.getTime() - (now.getTimezoneOffset() * 60000));
+        return localDate.toISOString().slice(0, 16); // yyyy-MM-ddTHH:mm format
+    };
+
+    // State to store the minimum datetime
+    const [minDateTime, setMinDateTime] = useState(getCurrentDateTimeLocal());
+
+    useEffect(() => {
+        const intervalId = setInterval(() => {
+            setMinDateTime(getCurrentDateTimeLocal());
+        }, 60000); // Update the minimum date every minute
+
+        return () => clearInterval(intervalId); // Cleanup on component unmount
+    }, []);
 
     return (
         <div className='container'>
@@ -194,7 +191,6 @@ export default function Dashboard() {
                                 <div className={styles.event_card}>
                                     <h2>Name: {event.name}</h2>
                                     <p>Address: {event.address}</p>
-                                    {/* Add more event details as needed */}
                                 </div>
                             </Link>
                         ))}
@@ -209,47 +205,128 @@ export default function Dashboard() {
                 aria-labelledby="modal-modal-title"
                 aria-describedby="modal-modal-description"
             >
-                <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 400, bgcolor: 'background.paper', border: '2px solid #000', boxShadow: 24, p: 4 }}>
-                    <Typography id="modal-modal-title" variant="h6" component="h2">
+                <Box sx={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: {
+                        xs: '100vw',
+                        sm: '80vw',
+                    },
+                    maxWidth: {
+                        xs: '100%',
+                        sm: '600px',
+                    },
+                    maxHeight: {
+                        xs: '100vh', // Full height on extra-small screens (typically mobile devices)
+                        sm: '80vh', // Smaller height on small screens and above
+                    },
+                    overflowY: 'auto',
+                    bgcolor: 'background.paper',
+                    border: '2px solid #000',
+                    boxShadow: 24,
+                    p: 4,
+                    m: 0,
+                    borderRadius: {
+                        xs: 0, // No border radius on extra-small screens
+                        sm: '4px', // Rounded corners on small screens and above
+                    },
+                }}>
+                    <Typography component="h2" style={{ fontWeight: 'bold', textAlign: 'center' }}>
                         Create Event
                     </Typography>
+                    <IconButton
+                        aria-label="close"
+                        onClick={handleClose}
+                        sx={{
+                            position: 'absolute',
+                            right: 8,
+                            top: 8,
+                            color: (theme) => theme.palette.grey[500],
+                        }}
+                    >
+                        <CloseIcon />
+                    </IconButton>
                     <TextField
-                        margin="dense"
+                        label="Event Name"
                         name="name"
-                        label="Name"
-                        type="text"
                         fullWidth
-                        variant="standard"
                         value={eventData.name}
-                        onChange={handleChange}
+                        onChange={(e) => setEventData({ ...eventData, name: e.target.value })}
                     />
-                    <Box sx={{ display: 'flex', alignItems: 'center', mt: 2 }}>
-                        <TextField
-                            margin="dense"
-                            name="keywords"
-                            label="Keywords"
-                            type="text"
-                            fullWidth
-                            variant="standard"
-                            value={keywordInput}
-                            onChange={handleKeywordChange}
-                        />
-                        <Button onClick={handleAddKeyword} variant="contained" sx={{ ml: 2, backgroundColor: '#272727', color: '#fff', height: '40px' }}>
-                            Add
-                        </Button>
-                    </Box>
-                    <Box sx={{ mt: 2 }}>
-                        <Stack direction="row" spacing={1} sx={{ mt: 2, flexWrap: 'wrap' }}>
-                            {eventData.keywords.map((keyword, index) => (
-                                <Chip
-                                    key={index}
-                                    label={keyword}
-                                    onDelete={() => handleDeleteKeyword(keyword)}
-                                    sx={{ mb: 1 }}
-                                />
-                            ))}
-                        </Stack>
-                    </Box>
+                    <TextField
+                        label="Address"
+                        name="address"
+                        fullWidth
+                        value={eventData.address}
+                        onChange={(e) => setEventData({ ...eventData, address: e.target.value })}
+                        sx={{ mt: 2 }}
+                    />
+                    <TextField
+                        label="Start Date and Time"
+                        type="datetime-local"
+                        fullWidth
+                        value={eventData.start_datetime}
+                        onChange={(e) => setEventData({ ...eventData, start_datetime: e.target.value })}
+                        InputLabelProps={{
+                            shrink: true,
+                        }}
+                        inputProps={{
+                            min: minDateTime
+                        }}
+                        sx={{ mt: 2 }}
+                    />
+                    <TextField
+                        label="End Date and Time"
+                        type="datetime-local"
+                        fullWidth
+                        value={eventData.end_datetime}
+                        onChange={(e) => setEventData({ ...eventData, end_datetime: e.target.value })}
+                        InputLabelProps={{
+                            shrink: true,
+                        }}
+                        inputProps={{
+                            min: eventData.start_datetime || minDateTime // Ensure end time is not before start time
+                        }}
+                        sx={{ mt: 2 }}
+                    />
+                    <TextField
+                        label="Description"
+                        name="description"
+                        fullWidth
+                        multiline
+                        rows={4}
+                        value={eventData.description}
+                        onChange={(e) => setEventData({ ...eventData, description: e.target.value })}
+                        sx={{ mt: 2 }}
+                    />
+                    <Typography component="h2" style={{ fontWeight: 'bold', textAlign: 'center', marginTop: "1rem" }}>
+                        Add keywords For Preference
+                    </Typography>
+                    {Object.entries(categories).map(([category, values]) => (
+                        <FormControl fullWidth sx={{ mt: 2 }} key={category}>
+                            <InputLabel>{category}</InputLabel>
+                            <Select
+                                label={category}
+                                onChange={(e) => handleSelectChange(category, e.target.value)}
+                                value=""
+                            >
+                                {values.map((value) => (
+                                    <MenuItem key={value} value={value}>{value}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                    ))}
+                    <Stack direction="row" spacing={1} sx={{ mt: 2, flexWrap: 'wrap' }}>
+                        {eventData.keywords.map((keyword, index) => (
+                            <Chip
+                                key={index}
+                                label={keyword}
+                                onDelete={() => handleDeleteKeyword(keyword)}
+                            />
+                        ))}
+                    </Stack>
                     <Button onClick={handleSubmit} variant="contained" sx={{ mt: 2, backgroundColor: '#272727', color: '#fff' }}>
                         Submit
                     </Button>

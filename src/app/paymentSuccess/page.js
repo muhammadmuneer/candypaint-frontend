@@ -19,7 +19,7 @@ export default function PaymentSuccess() {
 
     if (signupData) {
       axios
-        .post('http://13.50.187.28/api/v1/users/signup/', signupData)
+        .post('https://api.candypaint.us/api/v1/users/signup/', signupData)
         .then((response) => {
           // Handle successful signup, e.g., navigate to the verification page or login page
           console.log(response.data)
