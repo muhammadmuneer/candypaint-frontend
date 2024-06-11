@@ -1,33 +1,39 @@
 {
-  "name": "poppy-next",
-  "version": "0.1.0",
+  "name": "coming-soon",
+  "desription": "Clean Coming Soon Template (Tailwind CSS, NextJs & HTML5)",
+  "version": "1.0.0",
+  "keywords": [
+    "coming soon",
+    "tailwind",
+    "tailwindcss",
+    "nextjs",
+    "html"
+  ],
+  "author": "Themeptation",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "export": "next export",
+    "type-check": "tsc"
   },
   "dependencies": {
-    "@emotion/react": "^11.11.4",
-    "@emotion/styled": "^11.11.5",
-    "@headlessui/react": "^2.0.4",
-    "@heroicons/react": "^2.1.3",
-    "@mui/icons-material": "^5.15.18",
-    "@mui/material": "^5.15.18",
-    "axios": "^1.7.2",
-    "formik": "^2.4.6",
-    "moment": "^2.30.1",
-    "next": "14.2.3",
-    "qrcode.react": "^3.1.0",
-    "react": "^18",
-    "react-dom": "^18",
-    "react-spinners": "^0.13.8",
-    "stripe": "^15.8.0",
-    "yup": "^1.4.0"
+    "autoprefixer": "^10.4.0",
+    "next": "latest",
+    "postcss": "^8.3.11",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "sharp": "^0.29.3",
+    "tailwindcss": "^2.2.19",
+    "eslint": "^7.32.0",
+    "eslint-config-next": "12.0.4"
   },
   "devDependencies": {
-    "eslint": "^8",
-    "eslint-config-next": "14.2.3"
+    "@types/node": "^16.11.7",
+    "@types/react": "^17.0.35",
+    "@types/react-dom": "^17.0.11",
+    "typescript": "4.5.2"
   }
 }
